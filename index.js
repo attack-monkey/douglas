@@ -25,8 +25,6 @@ function npmInitY(package) {
     console.log(green, 'npm init-ing...', reset);
     exec('npm init -y',
         function (error, stdout, stderr) {
-            // console.log(stdout);
-            // console.log(stderr);
             if (error !== null) {
                 console.log(red, error, reset);
             } else {
@@ -39,10 +37,9 @@ function installNpmPackage(package) {
     console.log(green, 'Getting npm package...', reset);
     exec('npm install ' + package,
         function (error, stdout, stderr) {
-            // console.log(stdout);
-            // console.log(stderr);
+            const errorMsg = 'We\'re having trouble locating your npm package. Maybe you\'ve spelt the name incorrectly ?!';
             if (error !== null) {
-                console.log(red, error, reset);
+                console.log(red, errorMsg, reset);
             } else {
                 moveContentsToRoot(package);
             }
@@ -51,7 +48,25 @@ function installNpmPackage(package) {
 
 function moveContentsToRoot(package) {
     fs.copySync(process.cwd() + '/node_modules/' + package, process.cwd());
-    deleteDougPackage(package);
+    overWritePackage(package);
+}
+
+function overWritePackage(package) {
+    try {
+        fs.copySync(process.cwd() + '/_package.json', process.cwd() + '/package.json');
+        deleteDoug_PackageJson(package);
+    } catch (e) {
+        // no _package.json
+        // moving on...
+        deleteDougPackage(package);
+    }
+}
+
+function deleteDoug_PackageJson(package) {
+    fs.remove(process.cwd() + '/_package.json', err => {
+        if (err) return console.error(red, err, reset)
+        deleteDougPackage(package);
+    })
 }
 
 function deleteDougPackage(package) {
