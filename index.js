@@ -12,11 +12,17 @@ loadCommands();
 
 function loadCommands() {
     program
-        .version('1.0.0')
+        .version('1.5.0')
         .command('get <package>')
         .action(function (package) {
             npmInitY(package)
-        })
+        });
+    
+    program
+        .command('publish')
+        .action(function () {
+            create_packageJson()
+        });
 
     program.parse(process.argv);
 }
@@ -90,3 +96,31 @@ function npmInstall() {
             }
         });
 }
+
+//// publish
+
+function create_packageJson() {
+    try {
+        console.log(green, 'Creating a _package.json... ', reset);
+        fs.copySync(process.cwd() + '/package.json', process.cwd() + '/_package.json');
+        npmPublish();
+    } catch (e) {
+        const error = 'Error creating a _package.json from package.json. Is the file missing?'
+        console.log(red, error, reset);
+    }
+}
+
+function npmPublish() {
+    console.log(green, 'npm publish-ing...', reset);
+    exec('npm publish',
+        function (error, stdout, stderr) {
+            console.log(stdout);
+            console.log(stderr);
+            if (error !== null) {
+                console.log(red, error, reset);
+            } else {
+                console.log(green, 'Done... Douglas out!', reset);
+            }
+        });
+}
+
